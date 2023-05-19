@@ -10,7 +10,6 @@ import (
 
 func TestStore(t *testing.T) (*Store, func(...string)) {
 	t.Helper()
-
 	newConfig, err := config.NewConfig("../../../configs/apiserver_test.yaml")
 	if err != nil {
 		log.Fatal(err)
