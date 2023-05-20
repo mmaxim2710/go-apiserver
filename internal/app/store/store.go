@@ -6,6 +6,7 @@ import (
 	_ "github.com/lib/pq"
 	"github.com/mmaxim2710/firstWebApp/internal/app/config"
 	"github.com/sirupsen/logrus"
+	"os"
 )
 
 type Store struct {
@@ -26,7 +27,7 @@ func New(c *config.Config, logger *logrus.Logger) *Store {
 func (s *Store) Open() error {
 	s.logger.Debugf("Opening connection with db \"%s\"", s.config.DB.DBName)
 	db, err := sql.Open("postgres", fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
-		s.config.DB.Host, s.config.DB.Port, s.config.DB.User, s.config.DB.Password, s.config.DB.DBName))
+		s.config.DB.Host, s.config.DB.Port, s.config.DB.User, os.Getenv("DB_PASSWORD"), s.config.DB.DBName))
 	if err != nil {
 		return err
 	}
