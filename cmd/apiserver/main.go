@@ -4,6 +4,7 @@ import (
 	"flag"
 	"github.com/mmaxim2710/firstWebApp/internal/app/apiserver"
 	"github.com/mmaxim2710/firstWebApp/internal/app/config"
+	"github.com/sirupsen/logrus"
 	"log"
 )
 
@@ -23,7 +24,9 @@ func main() {
 		log.Fatal("err in main(): ", err)
 	}
 
-	s := apiserver.New(newConfig)
+	logger := logrus.New()
+
+	s := apiserver.New(newConfig, logger)
 
 	if err := s.Start(); err != nil {
 		log.Fatal(err)

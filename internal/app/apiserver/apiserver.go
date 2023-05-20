@@ -16,10 +16,10 @@ type APIServer struct {
 	store  *store.Store
 }
 
-func New(config *config.Config) *APIServer {
+func New(config *config.Config, logger *logrus.Logger) *APIServer {
 	return &APIServer{
 		config: config,
-		logger: logrus.New(),
+		logger: logger,
 		router: mux.NewRouter(),
 	}
 }
@@ -56,7 +56,7 @@ func (s *APIServer) configureRouter() {
 }
 
 func (s *APIServer) configureStore() error {
-	st := store.New(s.config)
+	st := store.New(s.config, s.logger)
 	if err := st.Open(); err != nil {
 		return err
 	}

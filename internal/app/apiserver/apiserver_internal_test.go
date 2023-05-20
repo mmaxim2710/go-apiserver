@@ -2,6 +2,7 @@ package apiserver
 
 import (
 	"github.com/mmaxim2710/firstWebApp/internal/app/config"
+	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 	"net/http"
 	"net/http/httptest"
@@ -14,7 +15,7 @@ func TestAPIServer_HandleHello(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	s := New(newCfg)
+	s := New(newCfg, logrus.New())
 	rec := httptest.NewRecorder()
 	req, _ := http.NewRequest(http.MethodGet, "/hello", nil)
 	s.handleHello().ServeHTTP(rec, req)

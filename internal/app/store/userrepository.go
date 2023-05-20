@@ -7,6 +7,7 @@ type UserRepository struct {
 }
 
 func (r *UserRepository) Create(u *model.User) (*model.User, error) {
+	r.store.logger.Debugf("Creating user with email=%s", u.Email)
 	err := u.Validate()
 	if err != nil {
 		return nil, err
@@ -29,6 +30,7 @@ func (r *UserRepository) Create(u *model.User) (*model.User, error) {
 }
 
 func (r *UserRepository) FindByEmail(email string) (*model.User, error) {
+	r.store.logger.Debugf("Querying user with email=%s", email)
 	u := &model.User{}
 	err := r.store.db.QueryRow(
 		"SELECT id, email, encrypted_password FROM users WHERE email = $1", email,

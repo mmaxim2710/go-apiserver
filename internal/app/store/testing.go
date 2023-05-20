@@ -3,6 +3,7 @@ package store
 import (
 	"fmt"
 	"github.com/mmaxim2710/firstWebApp/internal/app/config"
+	"github.com/sirupsen/logrus"
 	"strings"
 	"testing"
 )
@@ -13,7 +14,7 @@ func TestStore(t *testing.T) (*Store, func(...string)) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	s := New(newConfig)
+	s := New(newConfig, logrus.New())
 	if err := s.Open(); err != nil {
 		t.Fatal(err)
 	}
