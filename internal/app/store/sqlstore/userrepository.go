@@ -1,32 +1,32 @@
-package store
+package sqlstore
 
-import "github.com/mmaxim2710/firstWebApp/internal/app/model"
+import (
+	"database/sql"
+	"github.com/mmaxim2710/firstWebApp/internal/app/model"
+	"github.com/mmaxim2710/firstWebApp/internal/app/store"
+)
 
 type UserRepository struct {
 	store *Store
 }
 
-func (r *UserRepository) Create(u *model.User) (*model.User, error) {
+func (r *UserRepository) Create(u *model.User) error {
 	r.store.logger.Debugf("Creating user with email=%s", u.Email)
 	err := u.Validate()
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	err = u.BeforeCreate()
 	if err != nil {
-		return nil, err
+		return err
 	}
 
-	err = r.store.db.QueryRow(
+	return r.store.db.QueryRow(
 		"INSERT INTO users (email, encrypted_password) VALUES ($1, $2) RETURNING uuid",
 		u.Email,
 		u.EncryptedPassword,
 	).Scan(&u.UUID)
-	if err != nil {
-		return nil, err
-	}
-	return u, nil
 }
 
 func (r *UserRepository) FindByEmail(email string) (*model.User, error) {
@@ -36,6 +36,10 @@ func (r *UserRepository) FindByEmail(email string) (*model.User, error) {
 		"SELECT uuid, email, encrypted_password FROM users WHERE email = $1", email,
 	).Scan(&u.UUID, &u.Email, &u.EncryptedPassword)
 	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, store.ErrRecordNotFound
+		}
+
 		return nil, err
 	}
 

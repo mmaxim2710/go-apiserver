@@ -26,9 +26,7 @@ func main() {
 
 	logger := logrus.New()
 
-	s := apiserver.New(newConfig, logger)
-
-	if err := s.Start(); err != nil {
+	if err := apiserver.Start(newConfig, logger); err != nil {
 		log.Fatal(err)
 	}
 }

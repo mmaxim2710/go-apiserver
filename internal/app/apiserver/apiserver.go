@@ -1,75 +1,51 @@
 package apiserver
 
 import (
-	"github.com/gorilla/mux"
+	"database/sql"
+	"fmt"
 	"github.com/mmaxim2710/firstWebApp/internal/app/config"
-	"github.com/mmaxim2710/firstWebApp/internal/app/store"
+	"github.com/mmaxim2710/firstWebApp/internal/app/store/sqlstore"
 	"github.com/sirupsen/logrus"
-	"io"
 	"net/http"
+	"os"
 )
 
-type APIServer struct {
-	config *config.Config
-	logger *logrus.Logger
-	router *mux.Router
-	store  *store.Store
-}
-
-func New(config *config.Config, logger *logrus.Logger) *APIServer {
-	return &APIServer{
-		config: config,
-		logger: logger,
-		router: mux.NewRouter(),
-	}
-}
-
-func (s *APIServer) Start() error {
-	if err := s.configureLogger(); err != nil {
-		return err
-	}
-
-	s.configureRouter()
-
-	if err := s.configureStore(); err != nil {
-		return err
-	}
-
-	s.logger.Info("Starting api server on port", s.config.Server.BindAddr)
-
-	return http.ListenAndServe(s.config.Server.BindAddr, s.router)
-}
-
-func (s *APIServer) configureLogger() error {
-	level, err := logrus.ParseLevel(s.config.LogLevel)
+func Start(config *config.Config, logger *logrus.Logger) error {
+	db, err := newDB(config)
 	if err != nil {
 		return err
 	}
 
-	s.logger.SetLevel(level)
-
-	return nil
-}
-
-func (s *APIServer) configureRouter() {
-	s.router.HandleFunc("/hello", s.handleHello())
-}
-
-func (s *APIServer) configureStore() error {
-	st := store.New(s.config, s.logger)
-	if err := st.Open(); err != nil {
-		return err
-	}
-
-	s.store = st
-	return nil
-}
-
-func (s *APIServer) handleHello() http.HandlerFunc {
-	return func(rw http.ResponseWriter, req *http.Request) {
-		_, err := io.WriteString(rw, "hello")
+	defer func(db *sql.DB) {
+		err := db.Close()
 		if err != nil {
-			s.logger.Error(err)
+			logger.Fatal(err)
 		}
+	}(db)
+
+	store := sqlstore.New(db, logger)
+	s := newServer(store, logger)
+	return http.ListenAndServe(config.Server.BindAddr, s)
+}
+
+func newDB(dbconf *config.Config) (*sql.DB, error) {
+	pwd, ok := os.LookupEnv("DB_PASSWORD")
+	if !ok {
+		return nil, ErrEnvVariableNotFound
 	}
+
+	db, err := sql.Open("postgres",
+		fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
+			dbconf.DB.Host, dbconf.DB.Port, dbconf.DB.User, pwd, dbconf.DB.DBName,
+		),
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	if err := db.Ping(); err != nil {
+		return nil, err
+	}
+
+	return db, err
 }
