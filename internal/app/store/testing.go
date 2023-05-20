@@ -3,7 +3,6 @@ package store
 import (
 	"fmt"
 	"github.com/mmaxim2710/firstWebApp/internal/app/config"
-	"log"
 	"strings"
 	"testing"
 )
@@ -12,7 +11,7 @@ func TestStore(t *testing.T) (*Store, func(...string)) {
 	t.Helper()
 	newConfig, err := config.NewConfig("../../../configs/apiserver_test.yaml")
 	if err != nil {
-		log.Fatal(err)
+		t.Fatal(err)
 	}
 	s := New(newConfig)
 	if err := s.Open(); err != nil {
