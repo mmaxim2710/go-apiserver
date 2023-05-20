@@ -3,11 +3,12 @@ package model
 import (
 	validation "github.com/go-ozzo/ozzo-validation"
 	"github.com/go-ozzo/ozzo-validation/is"
+	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
 )
 
 type User struct {
-	ID                int
+	UUID              uuid.UUID
 	Email             string
 	Password          string
 	EncryptedPassword string
