@@ -16,6 +16,15 @@ func TestUserRepository_Create(t *testing.T) {
 	assert.NotNil(t, u)
 }
 
+func TestUserRepository_Find(t *testing.T) {
+	s := teststore.New()
+	u := model.TestUser(t)
+	_ = s.User().Create(u)
+	found, err := s.User().Find(u.UUID)
+	assert.NoError(t, err)
+	assert.NotNil(t, found)
+}
+
 func TestUserRepository_FindByEmail(t *testing.T) {
 	s := teststore.New()
 	email := "test_user@example.org"

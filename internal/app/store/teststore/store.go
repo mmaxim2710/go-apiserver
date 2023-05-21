@@ -1,6 +1,7 @@
 package teststore
 
 import (
+	"github.com/google/uuid"
 	"github.com/mmaxim2710/firstWebApp/internal/app/model"
 	"github.com/mmaxim2710/firstWebApp/internal/app/store"
 )
@@ -20,7 +21,7 @@ func (s *Store) User() store.UserRepository {
 
 	s.userRepository = &UserRepository{
 		store: s,
-		users: make(map[string]*model.User),
+		users: make(map[uuid.UUID]*model.User),
 	}
 
 	return s.userRepository
