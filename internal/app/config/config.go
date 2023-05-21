@@ -11,7 +11,8 @@ type Config struct {
 		BindAddr string `yaml:"bind_addr"`
 	} `yaml:"server"`
 
-	LogLevel string `yaml:"log_level"`
+	SessionKey string `yaml:"session_key"`
+	LogLevel   string `yaml:"log_level"`
 
 	DB struct {
 		Host   string `yaml:"host"`

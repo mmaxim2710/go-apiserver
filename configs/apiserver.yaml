@@ -2,6 +2,7 @@ server:
   bind_addr: ":8080"
 
 log_level: "debug"
+session_key: "gvsYQEGXZqMHng5CA1IgJIWk12SiU3aS"
 
 db:
   host: "localhost"

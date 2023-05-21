@@ -5,6 +5,7 @@ import (
 	"github.com/mmaxim2710/firstWebApp/internal/app/apiserver"
 	"github.com/mmaxim2710/firstWebApp/internal/app/config"
 	"github.com/mmaxim2710/firstWebApp/internal/app/logger"
+	"log"
 )
 
 var (
@@ -20,14 +21,14 @@ func main() {
 
 	newConfig, err := config.NewConfig(configPath)
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
 
 	if err := logger.ConfigureLogger(newConfig.LogLevel); err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
 
 	if err := apiserver.Start(newConfig); err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
 }

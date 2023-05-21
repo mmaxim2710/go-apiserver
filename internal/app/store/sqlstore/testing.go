@@ -5,6 +5,7 @@ import (
 	"fmt"
 	_ "github.com/lib/pq"
 	"github.com/mmaxim2710/firstWebApp/internal/app/config"
+	"github.com/mmaxim2710/firstWebApp/internal/app/logger"
 	"os"
 	"strings"
 	"testing"
@@ -12,6 +13,7 @@ import (
 
 func TestDB(t *testing.T) (*sql.DB, func(...string)) {
 	t.Helper()
+	_ = logger.ConfigureLogger("debug")
 	newConfig, err := config.NewConfig("../../../../configs/apiserver_test.yaml")
 	if err != nil {
 		t.Fatal(err)

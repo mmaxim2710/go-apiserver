@@ -3,6 +3,7 @@ package apiserver
 import (
 	"database/sql"
 	"fmt"
+	"github.com/gorilla/sessions"
 	"github.com/mmaxim2710/firstWebApp/internal/app/config"
 	"github.com/mmaxim2710/firstWebApp/internal/app/logger"
 	"github.com/mmaxim2710/firstWebApp/internal/app/store/sqlstore"
@@ -11,6 +12,7 @@ import (
 )
 
 func Start(config *config.Config) error {
+	logger.GetLogger().Infof("Starting server at port %s", config.Server.BindAddr)
 	db, err := newDB(config)
 	if err != nil {
 		return err
@@ -24,7 +26,8 @@ func Start(config *config.Config) error {
 	}(db)
 
 	store := sqlstore.New(db)
-	s := newServer(store)
+	sessionStore := sessions.NewCookieStore([]byte(config.SessionKey))
+	s := newServer(store, sessionStore)
 	return http.ListenAndServe(config.Server.BindAddr, s)
 }
 
