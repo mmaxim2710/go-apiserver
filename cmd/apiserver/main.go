@@ -4,8 +4,7 @@ import (
 	"flag"
 	"github.com/mmaxim2710/firstWebApp/internal/app/apiserver"
 	"github.com/mmaxim2710/firstWebApp/internal/app/config"
-	"github.com/sirupsen/logrus"
-	"log"
+	"github.com/mmaxim2710/firstWebApp/internal/app/logger"
 )
 
 var (
@@ -21,12 +20,14 @@ func main() {
 
 	newConfig, err := config.NewConfig(configPath)
 	if err != nil {
-		log.Fatal("err in main(): ", err)
+		panic(err)
 	}
 
-	logger := logrus.New()
+	if err := logger.ConfigureLogger(newConfig.LogLevel); err != nil {
+		panic(err)
+	}
 
-	if err := apiserver.Start(newConfig, logger); err != nil {
-		log.Fatal(err)
+	if err := apiserver.Start(newConfig); err != nil {
+		panic(err)
 	}
 }

@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"github.com/mmaxim2710/firstWebApp/internal/app/store/teststore"
-	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 	"net/http"
 	"net/http/httptest"
@@ -12,7 +11,7 @@ import (
 )
 
 func TestServer_HandleUsersCreate(t *testing.T) {
-	s := newServer(teststore.New(), logrus.New())
+	s := newServer(teststore.New())
 
 	testCases := []struct {
 		name         string

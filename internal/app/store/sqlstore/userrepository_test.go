@@ -3,7 +3,6 @@ package sqlstore_test
 import (
 	"github.com/mmaxim2710/firstWebApp/internal/app/model"
 	"github.com/mmaxim2710/firstWebApp/internal/app/store/sqlstore"
-	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
@@ -11,7 +10,7 @@ import (
 func TestUserRepository_Create(t *testing.T) {
 	db, teardown := sqlstore.TestDB(t)
 	defer teardown("users")
-	s := sqlstore.New(db, logrus.New())
+	s := sqlstore.New(db)
 	u := model.TestUser(t)
 	err := s.User().Create(u)
 	assert.NoError(t, err)
@@ -22,7 +21,7 @@ func TestUserRepository_FindByEmail(t *testing.T) {
 	db, teardown := sqlstore.TestDB(t)
 	defer teardown("users")
 
-	s := sqlstore.New(db, logrus.New())
+	s := sqlstore.New(db)
 	email := "test_user@example.org"
 
 	_, err := s.User().FindByEmail(email)

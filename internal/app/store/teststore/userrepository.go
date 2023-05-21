@@ -1,6 +1,7 @@
 package teststore
 
 import (
+	"github.com/google/uuid"
 	"github.com/mmaxim2710/firstWebApp/internal/app/model"
 	"github.com/mmaxim2710/firstWebApp/internal/app/store"
 )
@@ -22,7 +23,11 @@ func (r *UserRepository) Create(u *model.User) error {
 	}
 
 	r.users[u.Email] = u
-
+	newUuid, err := uuid.NewUUID()
+	if err != nil {
+		return err
+	}
+	u.UUID = newUuid
 	return nil
 }
 
