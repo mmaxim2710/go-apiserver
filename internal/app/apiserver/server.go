@@ -1,7 +1,9 @@
 package apiserver
 
 import (
+	"context"
 	"encoding/json"
+	"github.com/google/uuid"
 	"github.com/gorilla/mux"
 	"github.com/gorilla/sessions"
 	"github.com/mmaxim2710/firstWebApp/internal/app/model"
@@ -9,15 +11,18 @@ import (
 	"net/http"
 )
 
+const (
+	sessionName        = "moxem"
+	ctxKeyUser  ctxKey = iota
+)
+
+type ctxKey int8
+
 type server struct {
 	router       *mux.Router
 	store        store.Store
 	sessionStore sessions.Store
 }
-
-const (
-	sessionName = "moxem"
-)
 
 func newServer(store store.Store, sessionStore sessions.Store) *server {
 	s := &server{
@@ -38,6 +43,45 @@ func (s *server) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 func (s *server) configureRouter() {
 	s.router.HandleFunc("/users", s.handleUsersCreate()).Methods(http.MethodPost)
 	s.router.HandleFunc("/sessions", s.handleSessionsCreate()).Methods(http.MethodPost)
+
+	private := s.router.PathPrefix("/private").Subrouter()
+	private.Use(s.authenticateUser)
+	private.HandleFunc("/whoami", s.handleWhoami()).Methods(http.MethodGet)
+}
+
+func (s *server) authenticateUser(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
+		session, err := s.sessionStore.Get(req, sessionName)
+		if err != nil {
+			s.error(w, req, http.StatusInternalServerError, err)
+			return
+		}
+
+		id, ok := session.Values["user_uuid"]
+		if !ok {
+			s.error(w, req, http.StatusUnauthorized, ErrNotAuthenticated)
+			return
+		}
+
+		typedUUID, err := uuid.Parse(id.(string))
+		if err != nil {
+			s.error(w, req, http.StatusInternalServerError, err)
+			return
+		}
+
+		u, err := s.store.User().Find(typedUUID)
+		if err != nil {
+			s.error(w, req, http.StatusUnauthorized, ErrNotAuthenticated)
+		}
+
+		next.ServeHTTP(w, req.WithContext(context.WithValue(req.Context(), ctxKeyUser, u)))
+	})
+}
+
+func (s *server) handleWhoami() http.HandlerFunc {
+	return func(w http.ResponseWriter, req *http.Request) {
+		s.respond(w, req, http.StatusOK, req.Context().Value(ctxKeyUser).(*model.User))
+	}
 }
 
 func (s *server) handleUsersCreate() http.HandlerFunc {

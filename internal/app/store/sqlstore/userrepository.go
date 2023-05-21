@@ -2,6 +2,7 @@ package sqlstore
 
 import (
 	"database/sql"
+	"github.com/google/uuid"
 	"github.com/mmaxim2710/firstWebApp/internal/app/logger"
 	"github.com/mmaxim2710/firstWebApp/internal/app/model"
 	"github.com/mmaxim2710/firstWebApp/internal/app/store"
@@ -28,6 +29,22 @@ func (r *UserRepository) Create(u *model.User) error {
 		u.Email,
 		u.EncryptedPassword,
 	).Scan(&u.UUID)
+}
+
+func (r *UserRepository) Find(uuid uuid.UUID) (*model.User, error) {
+	logger.GetLogger().Debugf("Querying user with id=%v", uuid)
+	u := &model.User{}
+	err := r.store.db.QueryRow(
+		"SELECT uuid, email, encrypted_password FROM users WHERE uuid = $1", uuid,
+	).Scan(&u.UUID, &u.Email, &u.EncryptedPassword)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, store.ErrRecordNotFound
+		}
+		return nil, err
+	}
+
+	return u, nil
 }
 
 func (r *UserRepository) FindByEmail(email string) (*model.User, error) {

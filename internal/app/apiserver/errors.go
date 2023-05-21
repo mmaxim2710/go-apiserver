@@ -5,4 +5,5 @@ import "errors"
 var (
 	ErrEnvVariableNotFound      = errors.New("env variable not found")
 	ErrIncorrectEmailOrPassword = errors.New("incorrect email or password")
+	ErrNotAuthenticated         = errors.New("not authenticated")
 )
